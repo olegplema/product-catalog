@@ -1,0 +1,36 @@
+{
+  "name": "product-catalog",
+  "private": true,
+  "packageManager": "pnpm@10.13.1",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write --ignore-unknown",
+    "format:check": "prettier . --check --ignore-unknown",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck",
+    "prepare": "husky",
+    "dev:products": "pnpm --filter @product-catalog/products-service start:dev",
+    "dev:notifications": "pnpm --filter @product-catalog/notifications-service start:dev",
+    "dev:web": "pnpm --filter @product-catalog/web dev"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,yml,yaml}": "prettier --write",
+    "*.{ts,tsx,js,jsx}": "eslint --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@nestjs/cli": "^11.0.23",
+    "@nestjs/schematics": "^11.1.0",
+    "eslint": "^9.30.1",
+    "eslint-config-prettier": "^10.1.5",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.35.1"
+  }
+}
