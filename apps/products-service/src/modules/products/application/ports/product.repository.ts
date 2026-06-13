@@ -20,6 +20,7 @@ export type PaginatedProducts = {
 
 export interface ProductRepository {
   create(input: CreateProductInput): Promise<ProductEntity>;
+  findById(id: string): Promise<ProductEntity | null>;
   findPaginated(input: ListProductsInput): Promise<PaginatedProducts>;
   softDelete(id: string): Promise<boolean>;
 }

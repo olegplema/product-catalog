@@ -35,6 +35,16 @@ export class PrismaProductRepository implements ProductRepository {
     return this.toEntity(product);
   }
 
+  async findById(id: string): Promise<ProductEntity | null> {
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    return product ? this.toEntity(product) : null;
+  }
+
   async findPaginated(input: ListProductsInput): Promise<PaginatedProducts> {
     const skip = (input.page - 1) * input.limit;
 
