@@ -6,9 +6,11 @@ import { CreateProductUseCase } from './application/use-cases/create-product.use
 import { PRODUCT_REPOSITORY } from './application/ports/product.repository';
 import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
 import { ListProductsUseCase } from './application/use-cases/list-products.use-case';
+import { ProductsController } from './adapters/inbound/http/products.controller';
 
 @Module({
   imports: [PrismaModule],
+  controllers: [ProductsController],
   providers: [
     CreateProductUseCase,
     DeleteProductUseCase,
