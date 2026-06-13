@@ -5,14 +5,12 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
   Post,
   Query,
 } from '@nestjs/common';
 
-import { ProductNotFoundError } from '../../../application/errors/product-not-found.error';
 import { CreateProductUseCase } from '../../../application/use-cases/create-product.use-case';
 import { DeleteProductUseCase } from '../../../application/use-cases/delete-product.use-case';
 import { ListProductsUseCase } from '../../../application/use-cases/list-products.use-case';
@@ -53,14 +51,6 @@ export class ProductsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    try {
-      await this.deleteProductUseCase.execute({ id });
-    } catch (error: unknown) {
-      if (error instanceof ProductNotFoundError) {
-        throw new NotFoundException(error.message);
-      }
-
-      throw error;
-    }
+    await this.deleteProductUseCase.execute({ id });
   }
 }

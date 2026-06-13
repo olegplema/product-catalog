@@ -1,10 +1,11 @@
 import { MAX_PRICE_CENTS } from './price.constants';
+import { InvalidPriceError } from './errors/invalid-price.error';
 
 const PRICE_PATTERN = /^\d+(\.\d{1,2})?$/;
 
 export function parsePriceToCentsBigInt(price: string): bigint {
   if (!PRICE_PATTERN.test(price)) {
-    throw new Error('price must be a valid dollar amount with up to 2 decimal places');
+    throw new InvalidPriceError('price must be a valid dollar amount with up to 2 decimal places');
   }
 
   const [dollarsPart = '0', centsPart = ''] = price.split('.');
@@ -15,7 +16,7 @@ export function parsePriceToCentsBigInt(price: string): bigint {
 
 export function assertPriceCentsFitsInt(priceCents: bigint): void {
   if (priceCents > BigInt(MAX_PRICE_CENTS)) {
-    throw new Error(`price must not exceed ${formatPriceFromCents(MAX_PRICE_CENTS)}`);
+    throw new InvalidPriceError(`price must not exceed ${formatPriceFromCents(MAX_PRICE_CENTS)}`);
   }
 }
 
