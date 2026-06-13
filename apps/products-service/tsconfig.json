@@ -7,8 +7,9 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "prisma.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }
