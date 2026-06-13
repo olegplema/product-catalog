@@ -5,12 +5,14 @@ import { PrismaProductRepository } from './adapters/outbound/persistence/prisma-
 import { CreateProductUseCase } from './application/use-cases/create-product.use-case';
 import { PRODUCT_REPOSITORY } from './application/ports/product.repository';
 import { DeleteProductUseCase } from './application/use-cases/delete-product.use-case';
+import { ListProductsUseCase } from './application/use-cases/list-products.use-case';
 
 @Module({
   imports: [PrismaModule],
   providers: [
     CreateProductUseCase,
     DeleteProductUseCase,
+    ListProductsUseCase,
     {
       provide: PRODUCT_REPOSITORY,
       useClass: PrismaProductRepository,
