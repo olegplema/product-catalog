@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -8,6 +9,13 @@ import { ProductHttpErrorFilter } from './modules/products/adapters/inbound/http
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: process.env.WEB_ORIGIN ?? 'http://localhost:5173',
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
