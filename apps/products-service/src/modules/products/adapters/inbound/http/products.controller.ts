@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -14,11 +15,7 @@ import {
 import { CreateProductUseCase } from '../../../application/use-cases/create-product.use-case';
 import { DeleteProductUseCase } from '../../../application/use-cases/delete-product.use-case';
 import { ListProductsUseCase } from '../../../application/use-cases/list-products.use-case';
-import {
-  toCreateProductInput,
-  toPaginatedProductsResponse,
-  toProductResponse,
-} from './product-http.mapper';
+import { toCreateProductInput, toPaginatedProductsResponse } from './product-http.mapper';
 import type { PaginatedProductsResponseDto, ProductResponseDto } from './dto/product-response.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsQueryDto } from './dto/list-products-query.dto';
@@ -32,10 +29,14 @@ export class ProductsController {
   ) {}
 
   @Post()
-  async create(@Body() dto: CreateProductDto): Promise<ProductResponseDto> {
-    const product = await this.createProductUseCase.execute(toCreateProductInput(dto));
-
-    return toProductResponse(product);
+  async create(
+    @Body() dto: CreateProductDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ): Promise<ProductResponseDto> {
+    return this.createProductUseCase.execute({
+      ...toCreateProductInput(dto),
+      ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
+    });
   }
 
   @Get()

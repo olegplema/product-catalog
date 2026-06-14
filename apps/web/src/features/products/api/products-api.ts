@@ -6,6 +6,11 @@ import type {
   Product,
 } from '../model/product.types';
 
+export type CreateProductCommand = {
+  payload: CreateProductRequest;
+  idempotencyKey: string;
+};
+
 export async function getProducts(params: GetProductsParams): Promise<PaginatedProductsResponse> {
   const searchParams = new URLSearchParams({
     page: String(params.page),
@@ -15,8 +20,15 @@ export async function getProducts(params: GetProductsParams): Promise<PaginatedP
   return getRequest<PaginatedProductsResponse>(`/products?${searchParams.toString()}`);
 }
 
-export async function createProduct(payload: CreateProductRequest): Promise<Product> {
-  return postRequest<Product, CreateProductRequest>('/products', payload);
+export async function createProduct({
+  payload,
+  idempotencyKey,
+}: CreateProductCommand): Promise<Product> {
+  return postRequest<Product, CreateProductRequest>('/products', payload, {
+    headers: {
+      'Idempotency-Key': idempotencyKey,
+    },
+  });
 }
 
 export async function deleteProduct(id: string): Promise<void> {

@@ -1,5 +1,7 @@
 import { ArgumentsHost, Catch, type ExceptionFilter, HttpStatus, type Type } from '@nestjs/common';
 
+import { IdempotencyConflictError } from '../../../../application/errors/idempotency-conflict.error';
+import { InvalidIdempotencyKeyError } from '../../../../application/errors/invalid-idempotency-key.error';
 import { ProductNotFoundError } from '../../../../application/errors/product-not-found.error';
 import { InvalidPriceError } from '../errors/invalid-price.error';
 
@@ -30,6 +32,14 @@ const ERROR_HTTP_MAPPINGS = new Map<Type<Error>, ErrorHttpMapping>()
   .set(ProductNotFoundError, {
     statusCode: HttpStatus.NOT_FOUND,
     error: 'Not Found',
+  })
+  .set(IdempotencyConflictError, {
+    statusCode: HttpStatus.CONFLICT,
+    error: 'Conflict',
+  })
+  .set(InvalidIdempotencyKeyError, {
+    statusCode: HttpStatus.BAD_REQUEST,
+    error: 'Bad Request',
   })
   .set(InvalidPriceError, {
     statusCode: HttpStatus.BAD_REQUEST,

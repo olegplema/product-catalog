@@ -6,6 +6,10 @@ const httpClient = axios.create({
   baseURL: PRODUCTS_API_BASE_URL,
 });
 
+type RequestOptions = {
+  headers?: Record<string, string>;
+};
+
 export async function getRequest<T>(path: string): Promise<T> {
   try {
     const response = await httpClient.get<T>(path);
@@ -16,9 +20,13 @@ export async function getRequest<T>(path: string): Promise<T> {
   }
 }
 
-export async function postRequest<TResponse, TBody>(path: string, body: TBody): Promise<TResponse> {
+export async function postRequest<TResponse, TBody>(
+  path: string,
+  body: TBody,
+  options?: RequestOptions,
+): Promise<TResponse> {
   try {
-    const response = await httpClient.post<TResponse>(path, body);
+    const response = await httpClient.post<TResponse>(path, body, options);
 
     return response.data;
   } catch (error: unknown) {

@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ProductNotFoundError } from '../errors/product-not-found.error';
+import { OUTBOX_REPOSITORY, type OutboxRepositoryPort } from '../ports/outbox.repository';
+import { PRODUCT_REPOSITORY, type ProductRepository } from '../ports/product.repository';
 import {
-  PRODUCT_MUTATION_REPOSITORY,
-  type ProductMutationRepository,
-} from '../ports/product-mutation.repository';
+  PRODUCT_TRANSACTION_MANAGER,
+  type ProductTransactionManager,
+} from '../ports/product-transaction-manager';
+import { toProductDeletedEvent } from '../services/product-event.factory';
 
 export type DeleteProductInput = {
   id: string;
@@ -13,19 +16,33 @@ export type DeleteProductInput = {
 @Injectable()
 export class DeleteProductUseCase {
   constructor(
-    @Inject(PRODUCT_MUTATION_REPOSITORY)
-    private readonly productMutationRepository: ProductMutationRepository,
+    @Inject(PRODUCT_REPOSITORY)
+    private readonly productRepository: ProductRepository,
+    @Inject(OUTBOX_REPOSITORY)
+    private readonly outboxRepository: OutboxRepositoryPort,
+    @Inject(PRODUCT_TRANSACTION_MANAGER)
+    private readonly productTransactionManager: ProductTransactionManager,
   ) {}
 
   async execute(input: DeleteProductInput): Promise<void> {
-    const result = await this.productMutationRepository.deleteProduct(input.id);
+    await this.productTransactionManager.runInTransaction(async (transaction) => {
+      const product = await this.productRepository.findById(input.id, transaction);
 
-    if (result.status === 'not_found') {
-      throw new ProductNotFoundError(input.id);
-    }
+      if (!product) {
+        throw new ProductNotFoundError(input.id);
+      }
 
-    if (result.status === 'already_deleted') {
-      return;
-    }
+      if (product.deletedAt !== null) {
+        return;
+      }
+
+      const deleted = await this.productRepository.softDelete(input.id, transaction);
+
+      if (!deleted) {
+        return;
+      }
+
+      await this.outboxRepository.insert(transaction, toProductDeletedEvent(product));
+    });
   }
 }

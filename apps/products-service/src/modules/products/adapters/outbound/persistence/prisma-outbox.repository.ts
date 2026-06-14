@@ -4,6 +4,8 @@ import type { ProductEvent } from '@product-catalog/contracts';
 import { Prisma } from '../../../../../generated/prisma/client';
 import { OutboxStatus } from '../../../../../generated/prisma/enums';
 import { PrismaService } from '../../../../../infrastructure/database/prisma/prisma.service';
+import type { OutboxRepositoryPort } from '../../../application/ports/outbox.repository';
+import type { ProductTransaction } from '../../../application/ports/product-transaction-manager';
 
 const MAX_PUBLISH_ATTEMPTS = 5;
 
@@ -16,11 +18,11 @@ type OutboxMessageRow = {
 };
 
 @Injectable()
-export class OutboxRepository {
+export class OutboxRepository implements OutboxRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
-  async insert(tx: TransactionClient, event: ProductEvent): Promise<void> {
-    await tx.outboxMessage.create({
+  async insert(tx: ProductTransaction, event: ProductEvent): Promise<void> {
+    await this.getClient(tx).outboxMessage.create({
       data: {
         eventId: event.eventId,
         eventType: event.eventType,
@@ -81,6 +83,10 @@ export class OutboxRepository {
         timeout: 60_000,
       },
     );
+  }
+
+  private getClient(transaction: ProductTransaction): TransactionClient {
+    return transaction as TransactionClient;
   }
 }
 

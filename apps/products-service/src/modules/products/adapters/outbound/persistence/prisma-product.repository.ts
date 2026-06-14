@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { Prisma } from '../../../../../generated/prisma/client';
 import { PrismaService } from '../../../../../infrastructure/database/prisma/prisma.service';
 import type {
   CreateProductInput,
@@ -7,6 +8,7 @@ import type {
   PaginatedProducts,
   ProductRepository,
 } from '../../../application/ports/product.repository';
+import type { ProductTransaction } from '../../../application/ports/product-transaction-manager';
 import type { ProductEntity } from '../../../domain/product.entity';
 
 type PrismaProductRecord = {
@@ -23,8 +25,11 @@ type PrismaProductRecord = {
 export class PrismaProductRepository implements ProductRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(input: CreateProductInput): Promise<ProductEntity> {
-    const product = await this.prisma.product.create({
+  async create(
+    input: CreateProductInput,
+    transaction?: ProductTransaction,
+  ): Promise<ProductEntity> {
+    const product = await this.getClient(transaction).product.create({
       data: {
         name: input.name,
         description: input.description,
@@ -35,8 +40,8 @@ export class PrismaProductRepository implements ProductRepository {
     return this.toEntity(product);
   }
 
-  async findById(id: string): Promise<ProductEntity | null> {
-    const product = await this.prisma.product.findFirst({
+  async findById(id: string, transaction?: ProductTransaction): Promise<ProductEntity | null> {
+    const product = await this.getClient(transaction).product.findFirst({
       where: {
         id,
       },
@@ -72,8 +77,8 @@ export class PrismaProductRepository implements ProductRepository {
     };
   }
 
-  async softDelete(id: string): Promise<boolean> {
-    const result = await this.prisma.product.updateMany({
+  async softDelete(id: string, transaction?: ProductTransaction): Promise<boolean> {
+    const result = await this.getClient(transaction).product.updateMany({
       where: {
         id,
         deletedAt: null,
@@ -84,6 +89,10 @@ export class PrismaProductRepository implements ProductRepository {
     });
 
     return result.count > 0;
+  }
+
+  private getClient(transaction?: ProductTransaction): PrismaService | Prisma.TransactionClient {
+    return transaction ? (transaction as Prisma.TransactionClient) : this.prisma;
   }
 
   private toEntity(product: PrismaProductRecord): ProductEntity {

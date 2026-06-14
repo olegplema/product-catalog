@@ -1,4 +1,5 @@
 import type { ProductEntity } from '../../domain/product.entity';
+import type { ProductTransaction } from './product-transaction-manager';
 
 export const PRODUCT_REPOSITORY = Symbol('PRODUCT_REPOSITORY');
 
@@ -19,8 +20,8 @@ export type PaginatedProducts = {
 };
 
 export interface ProductRepository {
-  create(input: CreateProductInput): Promise<ProductEntity>;
-  findById(id: string): Promise<ProductEntity | null>;
+  create(input: CreateProductInput, transaction?: ProductTransaction): Promise<ProductEntity>;
+  findById(id: string, transaction?: ProductTransaction): Promise<ProductEntity | null>;
   findPaginated(input: ListProductsInput): Promise<PaginatedProducts>;
-  softDelete(id: string): Promise<boolean>;
+  softDelete(id: string, transaction?: ProductTransaction): Promise<boolean>;
 }

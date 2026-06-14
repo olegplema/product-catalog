@@ -73,7 +73,10 @@ export function ProductsPage() {
             }
           }}
           onSubmit={async (values: CreateProductRequest) => {
-            await createProductMutation.mutateAsync(values);
+            await createProductMutation.mutateAsync({
+              payload: values,
+              idempotencyKey: createIdempotencyKey(),
+            });
             createProductMutation.reset();
             setIsCreateOpen(false);
           }}
@@ -97,4 +100,12 @@ export function ProductsPage() {
       </div>
     </main>
   );
+}
+
+function createIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
