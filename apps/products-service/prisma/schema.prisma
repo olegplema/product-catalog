@@ -20,3 +20,24 @@ model Product {
   @@index([deletedAt])
   @@map("products")
 }
+
+enum OutboxStatus {
+  PENDING
+  PUBLISHED
+  FAILED
+}
+
+model OutboxMessage {
+  id          String       @id @default(uuid()) @db.Uuid
+  eventId     String       @unique @map("event_id") @db.Uuid
+  eventType   String       @map("event_type") @db.VarChar(255)
+  payload     Json
+  status      OutboxStatus @default(PENDING)
+  attempts    Int          @default(0)
+  lastError   String?      @map("last_error") @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  publishedAt DateTime?    @map("published_at")
+
+  @@index([status, createdAt])
+  @@map("outbox_messages")
+}
